@@ -1,0 +1,15 @@
+To recall your memory, read the following files first:
+history_20250814.md, LLM_report.md, and analyze_assignees.py. 
+View patent_assignee_analysis.png which you created using the above Python code.
+I have strong interest in the long, very long tail of assignees.
+All data is saved in LLM_all_removed.xlsx, and if you need more information about the patents,
+refer to Google Patents via the URL column saved there. 
+Please create LLM_long_tail_in_assignees.md
+
+
+You are a consultant for the CIO (Chief Intellectual Property Officer).
+You need to create a report that proposes a good IP portfolio strategy in the LLM field.
+Make good proposals and save them to portfolio_LLM.md.
+
+The portfolio should focus only on the long tail.
+These patents may be easy to buy.
