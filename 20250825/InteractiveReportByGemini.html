@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>インタラクティブ・レポート：量子回路によるLLM高速化への道</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Chosen Palette: Warm Neutrals with Subtle Accents -->
+    <!-- Application Structure Plan: The application is structured as a thematic, single-page journey. It starts with a high-level introduction (Why Quantum for LLM?), moves to the core problem (Classical Bottlenecks), presents the solution (Quantum Solutions & Hybrid Architecture), dives into the technical details (Key Technologies), outlines the strategic goal (Patent Strategy), and concludes with a practical guide (Roadmap). This non-linear, thematic structure allows users to explore based on their interest—from understanding the problem to implementing a solution—which is more intuitive than the linear structure of the source report. Navigation buttons provide smooth scrolling, and interactive elements like clickable cards and charts encourage exploration. -->
+    <!-- Visualization & Content Choices: 
+        - Classical Bottlenecks: Report Info -> LLM's core issues (Inference/Training) -> Goal: Inform/Compare -> Viz: Interactive Cards -> Interaction: Click to reveal details -> Justification: Breaks down complex problems into digestible, user-driven chunks. Method: HTML/CSS/JS.
+        - Hybrid Architecture: Report Info -> Quantum-Classical model structure -> Goal: Organize/Explain -> Viz: Interactive Diagram -> Interaction: Hover over components to get descriptions -> Justification: Visually explains the complex system architecture more effectively than text alone. Method: HTML/CSS/JS.
+        - Parameter Reduction Chart: Report Info -> QFFN parameter efficiency data -> Goal: Compare/Impact -> Viz: Bar Chart -> Interaction: Tooltips on hover -> Justification: Quantitatively demonstrates the primary benefit (parameter reduction) of the quantum approach. Library: Chart.js/Canvas.
+        - Simulator Comparison: Report Info -> Analysis of quantum simulators -> Goal: Compare/Guide -> Viz: Interactive Table -> Interaction: Click on rows to highlight -> Justification: Provides a clear, comparative view for practical decision-making. Method: HTML/CSS/JS.
+        - CONFIRMING NO SVG/Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+      body {
+        font-family: "Noto Sans JP", sans-serif;
+        background-color: #fdfbf8;
+        color: #3a3a3a;
+      }
+      .nav-button {
+        transition: all 0.3s ease;
+      }
+      .nav-button.active {
+        background-color: #a8dadc;
+        color: #1d3557;
+        font-weight: 500;
+      }
+      .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+      .content-section {
+        display: none;
+      }
+      .content-section.active {
+        display: block;
+      }
+      .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 400px;
+        max-height: 50vh;
+      }
+      .diagram-component {
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+        cursor: pointer;
+      }
+      .diagram-component:hover {
+        background-color: #e0fbfc;
+        border-color: #a8dadc;
+      }
+    </style>
+  </head>
+  <body class="antialiased">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <header class="text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold text-[#1D3557] mb-2">
+          量子回路が拓くLLMの未来
+        </h1>
+        <p class="text-lg text-gray-600">
+          大規模言語モデルのボトルネックを解消する技術・特許戦略・研究ロードマップ
+        </p>
+      </header>
+
+      <nav
+        class="sticky top-0 z-10 bg-[#FDFBF8]/80 backdrop-blur-md mb-12 py-4 border-b"
+      >
+        <div class="flex flex-wrap justify-center gap-2 md:gap-4">
+          <button
+            data-target="intro"
+            class="nav-button active text-sm md:text-base px-4 py-2 rounded-full bg-gray-200 text-gray-700"
+          >
+            序論
+          </button>
+          <button
+            data-target="problem"
+            class="nav-button text-sm md:text-base px-4 py-2 rounded-full bg-gray-200 text-gray-700"
+          >
+            古典計算の課題
+          </button>
+          <button
+            data-target="solution"
+            class="nav-button text-sm md:text-base px-4 py-2 rounded-full bg-gray-200 text-gray-700"
+          >
+            量子的解決策
+          </button>
+          <button
+            data-target="tech"
+            class="nav-button text-sm md:text-base px-4 py-2 rounded-full bg-gray-200 text-gray-700"
+          >
+            コア技術
+          </button>
+          <button
+            data-target="patent"
+            class="nav-button text-sm md:text-base px-4 py-2 rounded-full bg-gray-200 text-gray-700"
+          >
+            特許戦略
+          </button>
+          <button
+            data-target="roadmap"
+            class="nav-button text-sm md:text-base px-4 py-2 rounded-full bg-gray-200 text-gray-700"
+          >
+            実践ロードマップ
+          </button>
+        </div>
+      </nav>
+
+      <main>
+        <section id="intro" class="content-section active mb-16">
+          <h2 class="text-3xl font-bold text-[#457B9D] mb-6 text-center">
+            量子AIの夜明けとLLMのフロンティア
+          </h2>
+          <div
+            class="max-w-4xl mx-auto text-base md:text-lg leading-relaxed space-y-4 text-gray-700"
+          >
+            <p>
+              大規模言語モデル（LLM）は現代のAI技術の中核ですが、その巨大化に伴い、計算速度の遅延、莫大なメモリ消費という「古典コンピューティングの壁」に直面しています。このアプリケーションでは、その壁を打ち破る可能性を秘めた「量子コンピューティング」が、LLMのアーキテクチャをいかに再定義し、新たな計算の地平を切り拓くかを探ります。ここでは、技術的な核心から、知的財産権の確保、そして個人研究者でも実行可能な具体的な研究開発計画までをインタラクティブに解説します。
+            </p>
+            <p
+              class="p-4 bg-[#E0FBFC]/50 border-l-4 border-[#A8DADC] rounded-r-lg"
+            >
+              量子重ね合わせや量子もつれといった量子力学の原理は、単なる計算の高速化に留まらず、LLMが抱える根本的な課題に対し、全く異なるアプローチを提供します。このレポートは、その可能性を追求し、特許出願という目標へ至る道筋を示す羅針盤です。
+            </p>
+          </div>
+        </section>
+
+        <section id="problem" class="content-section mb-16">
+          <h2 class="text-3xl font-bold text-[#457B9D] mb-6 text-center">
+            LLMが直面する根本的課題
+          </h2>
+          <p class="max-w-3xl mx-auto text-center text-gray-600 mb-10">
+            LLMの性能は計算上のボトルネックに大きく左右されます。ここでは、推論と学習の各フェーズで顕在化する課題を解説します。カードをクリックして詳細をご覧ください。
+          </p>
+          <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <div
+              class="card bg-white p-6 rounded-xl shadow-md cursor-pointer"
+              onclick="toggleDetails('inference-details')"
+            >
+              <h3 class="text-2xl font-semibold text-[#1D3557] mb-3">
+                推論フェーズのボトルネック
+              </h3>
+              <p class="text-gray-600">
+                逐次的なトークン予測による高レイテンシ、巨大なモデルサイズとメモリ帯域幅の限界。
+              </p>
+              <div
+                id="inference-details"
+                class="hidden mt-4 pt-4 border-t border-gray-200 space-y-2 text-gray-700"
+              >
+                <p>
+                  <strong>高レイテンシ:</strong>
+                  ユーザーの入力に対し、トークンを一つずつ予測する逐次処理は、リアルタイム応答の大きな障害となります。
+                </p>
+                <p>
+                  <strong>メモリ帯域幅の限界:</strong>
+                  特にバッチサイズが小さい推論では、数十億のパラメータをメモリから計算ユニットへ転送する速度が全体のパフォーマンスを決定づけてしまいます。
+                </p>
+              </div>
+            </div>
+            <div
+              class="card bg-white p-6 rounded-xl shadow-md cursor-pointer"
+              onclick="toggleDetails('training-details')"
+            >
+              <h3 class="text-2xl font-semibold text-[#1D3557] mb-3">
+                学習フェーズのボトルネック
+              </h3>
+              <p class="text-gray-600">
+                アテンション機構の二次的計算量、高次元パラメータ空間における最適化の困難性。
+              </p>
+              <div
+                id="training-details"
+                class="hidden mt-4 pt-4 border-t border-gray-200 space-y-2 text-gray-700"
+              >
+                <p>
+                  <strong>二次的計算量:</strong>
+                  自己アテンション機構は、入力シーケンス長が長くなるほど計算コストが爆発的に増加（N²）するため、大規模データでの学習が非効率になります。
+                </p>
+                <p>
+                  <strong>最適化の罠:</strong>
+                  従来の勾配降下法では、高次元の複雑なパラメータ空間で局所最適解に陥りやすく、真に最適なモデルの発見が困難です。
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="solution" class="content-section mb-16">
+          <h2 class="text-3xl font-bold text-[#457B9D] mb-6 text-center">
+            量子コンピューティングによる解決策
+          </h2>
+          <p class="max-w-3xl mx-auto text-center text-gray-600 mb-10">
+            量子コンピューティングは、古典的な制約を超える新しいパラダイムを提供します。ここでは、推論と学習の課題を解決する2つの主要なアプローチと、それらを統合するハイブリッド・アーキテクチャを解説します。
+          </p>
+          <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
+            <div
+              class="bg-white p-6 rounded-xl shadow-sm border border-gray-200"
+            >
+              <h3 class="text-xl font-semibold text-[#1D3557] mb-3">
+                推論の解決策：モデル軽量化・圧縮
+              </h3>
+              <p class="text-gray-700">
+                量子状態の指数的な表現力を利用し、巨大なモデルパラメータを少数の量子ビットで圧縮。これによりメモリ消費を削減し、推論時のメモリ帯域幅ボトルネックを緩和します。
+              </p>
+            </div>
+            <div
+              class="bg-white p-6 rounded-xl shadow-sm border border-gray-200"
+            >
+              <h3 class="text-xl font-semibold text-[#1D3557] mb-3">
+                学習の解決策：計算・最適化の効率化
+              </h3>
+              <p class="text-gray-700">
+                アテンション計算を量子的に再設計し、二次的計算量の問題を回避。さらに、量子ナチュラル勾配降下法により、学習プロセスそのものを高速化・高精度化します。
+              </p>
+            </div>
+          </div>
+          <div class="bg-white p-8 rounded-xl shadow-lg max-w-5xl mx-auto">
+            <h3 class="text-2xl font-semibold text-center text-[#1D3557] mb-6">
+              ハイブリッド量子-古典アーキテクチャ
+            </h3>
+            <p
+              id="diagram-info"
+              class="text-center text-gray-600 mb-6 min-h-[48px]"
+            >
+              図の各コンポーネントにマウスオーバーすると説明が表示されます。
+            </p>
+            <div
+              class="flex flex-col md:flex-row items-center justify-center gap-4 text-center"
+            >
+              <div
+                class="diagram-component border-2 border-gray-300 p-4 rounded-lg w-full md:w-1/3"
+                onmouseover="showInfo('classical-info')"
+                onmouseout="resetInfo()"
+              >
+                <span class="text-2xl">🖥️</span>
+                <h4 class="font-semibold mt-2">古典コンピュータ</h4>
+                <p class="text-sm text-gray-500">データ前処理、制御、最適化</p>
+              </div>
+              <div class="text-2xl font-bold text-[#457B9D] mx-4">↔️</div>
+              <div
+                class="diagram-component border-2 border-gray-300 p-4 rounded-lg w-full md:w-1/3"
+                onmouseover="showInfo('quantum-info')"
+                onmouseout="resetInfo()"
+              >
+                <span class="text-2xl">⚛️</span>
+                <h4 class="font-semibold mt-2">量子コンピュータ (QPU)</h4>
+                <p class="text-sm text-gray-500">特定計算の高速化</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="tech" class="content-section mb-16">
+          <h2 class="text-3xl font-bold text-[#457B9D] mb-6 text-center">
+            量子LLMのコア技術
+          </h2>
+          <p class="max-w-3xl mx-auto text-center text-gray-600 mb-10">
+            ハイブリッド・アーキテクチャの心臓部となる、トランスフォーマーの主要コンポーネントを量子化する技術を解説します。特に、パラメータ効率を劇的に改善する量子フィードフォワードネットワーク（QFFN）に注目します。
+          </p>
+          <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
+            <div class="bg-white p-6 rounded-xl shadow-sm">
+              <h3 class="text-xl font-semibold text-[#1D3557] mb-3">
+                量子アテンション機構
+              </h3>
+              <p class="text-gray-700">
+                古典的なドット積計算を、量子状態間の「もつれ」の測定に置き換えます。これにより、より少ないパラメータで同等以上の性能を発揮する可能性があります。
+              </p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm">
+              <h3 class="text-xl font-semibold text-[#1D3557] mb-3">
+                量子フィードフォワードネットワーク (QFFN)
+              </h3>
+              <p class="text-gray-700">
+                モデルパラメータの約2/3を占めるFFNを、パラメータ付き量子回路（PQC）で代替。モデルを劇的に軽量化し、推論時のボトルネックを根本から解消します。
+              </p>
+            </div>
+          </div>
+          <div
+            class="bg-white p-6 md:p-8 rounded-xl shadow-lg max-w-5xl mx-auto"
+          >
+            <h3 class="text-2xl font-semibold text-center text-[#1D3557] mb-2">
+              QFFNによる驚異的なパラメータ削減効果
+            </h3>
+            <p class="text-center text-gray-600 mb-6">
+              シミュレーションでは、QFFNを導入したBERTモデルが、元のFFNパラメータを99%以上削減しつつ、同等の精度を達成しました。
+            </p>
+            <div class="chart-container">
+              <canvas id="parameterChart"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <section id="patent" class="content-section mb-16">
+          <h2 class="text-3xl font-bold text-[#457B9D] mb-6 text-center">
+            特許戦略と知的財産権の確保
+          </h2>
+          <p class="max-w-3xl mx-auto text-center text-gray-600 mb-10">
+            革新的な技術を保護し、競争優位性を築くためには、戦略的な特許出願が不可欠です。米国特許法（Alice判例）の要件を満たすためのポイントを解説します。
+          </p>
+          <div class="max-w-4xl mx-auto space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-md">
+              <h3 class="text-xl font-semibold text-[#1D3557] mb-3">
+                法的要件：抽象的アイデアからの脱却
+              </h3>
+              <p class="text-gray-700">
+                アルゴリズム自体は特許不適格と見なされるリスクがあります。これを回避するには、発明が単なるアイデアではなく、「コンピュータの機能を具体的に改善する」または「特定の技術的問題を解決する」ことを証明する必要があります。
+              </p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md">
+              <h3 class="text-xl font-semibold text-[#1D3557] mb-3">
+                特許化すべき3つの技術的コア
+              </h3>
+              <ul class="list-disc list-inside text-gray-700 space-y-2">
+                <li>
+                  <strong>QFFNアーキテクチャ:</strong>
+                  パラメータ効率を劇的に向上させる具体的な回路構成。
+                </li>
+                <li>
+                  <strong>量子アテンションの設計:</strong>
+                  量子エンタングルメント測定を用いた新しいアテンションスコア計算方法。
+                </li>
+                <li>
+                  <strong>量子最適化アルゴリズム:</strong>
+                  量子ナチュラル勾配降下法による学習の高速化手法。
+                </li>
+              </ul>
+            </div>
+            <div
+              class="p-4 bg-[#E0FBFC]/50 border-l-4 border-[#A8DADC] rounded-r-lg"
+            >
+              <p class="font-semibold text-[#1D3557]">最重要ポイント</p>
+              <p class="text-gray-800">
+                特許出願の鍵は、シミュレーションによって「具体的かつ測定可能な技術的優位性」（例：パラメータ99%削減、学習速度2倍）を定量的に示し、具体的な回路構造を詳細に記述することです。
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="roadmap" class="content-section mb-16">
+          <h2 class="text-3xl font-bold text-[#457B9D] mb-6 text-center">
+            一人研究のための実践的ロードマップ
+          </h2>
+          <p class="max-w-3xl mx-auto text-center text-gray-600 mb-10">
+            アイデアを形にし、論文執筆と特許出願を達成するための具体的なステップとツールを紹介します。適切なシミュレータの選択が成功の鍵となります。
+          </p>
+          <div
+            class="bg-white p-6 md:p-8 rounded-xl shadow-lg max-w-5xl mx-auto mb-12"
+          >
+            <h3 class="text-2xl font-semibold text-center text-[#1D3557] mb-6">
+              主要な量子シミュレータの比較
+            </h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr>
+                    <th
+                      class="py-3 px-4 bg-gray-100 font-semibold text-sm text-gray-600 border-b"
+                    >
+                      フレームワーク
+                    </th>
+                    <th
+                      class="py-3 px-4 bg-gray-100 font-semibold text-sm text-gray-600 border-b"
+                    >
+                      強み
+                    </th>
+                    <th
+                      class="py-3 px-4 bg-gray-100 font-semibold text-sm text-gray-600 border-b"
+                    >
+                      推奨フェーズ
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="text-gray-700">
+                  <tr class="hover:bg-gray-50">
+                    <td class="py-3 px-4 border-b font-medium">PennyLane</td>
+                    <td class="py-3 px-4 border-b">
+                      PyTorch/TensorFlowとの連携に特化。自動微分が強力。
+                    </td>
+                    <td class="py-3 px-4 border-b">概念実証 (PoC)</td>
+                  </tr>
+                  <tr class="hover:bg-gray-50">
+                    <td class="py-3 px-4 border-b font-medium">Qiskit</td>
+                    <td class="py-3 px-4 border-b">
+                      IBM実機との連携、豊富なエコシステム。
+                    </td>
+                    <td class="py-3 px-4 border-b">PoC、実機検証</td>
+                  </tr>
+                  <tr class="hover:bg-gray-50">
+                    <td class="py-3 px-4 border-b font-medium">Qulacs</td>
+                    <td class="py-3 px-4 border-b">
+                      日本発。GPUによる大規模・高速シミュレーション。
+                    </td>
+                    <td class="py-3 px-4 border-b">
+                      性能検証、スケーリング評価
+                    </td>
+                  </tr>
+                  <tr class="hover:bg-gray-50">
+                    <td class="py-3 px-4 border-b font-medium">
+                      TensorFlow Quantum
+                    </td>
+                    <td class="py-3 px-4 border-b">
+                      Cirqベース。ハイブリッドモデルのプロトタイピング。
+                    </td>
+                    <td class="py-3 px-4 border-b">PoC、ハイブリッド開発</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="max-w-4xl mx-auto space-y-4">
+            <h3 class="text-2xl font-semibold text-[#1D3557] mb-4">
+              研究開発の3ステップ
+            </h3>
+            <ol class="list-decimal list-inside space-y-4 text-gray-700">
+              <li class="p-4 bg-white rounded-lg shadow-sm">
+                <span class="font-semibold">データセットと回路設計:</span>
+                SST-2などの小規模データセットで開始。古典データを量子状態にエンコードし、その上に変分量子回路（VQC）としてQFFN等を実装します。
+              </li>
+              <li class="p-4 bg-white rounded-lg shadow-sm">
+                <span class="font-semibold">学習と評価:</span>
+                PennyLane等のハイブリッドフレームワークで量子回路のパラメータを学習させ、精度、パラメータ数、収束速度を厳密に計測・比較します。
+              </li>
+              <li class="p-4 bg-white rounded-lg shadow-sm">
+                <span class="font-semibold">論文・特許明細書の作成:</span>
+                シミュレーションで得られた定量的結果（例：「パラメータを99.2%削減」）を「発明の効果」として明記し、回路図と共に詳細な技術内容を記述します。
+              </li>
+            </ol>
+          </div>
+        </section>
+      </main>
+
+      <footer class="text-center mt-16 pt-8 border-t">
+        <p class="text-gray-500">
+          このインタラクティブ・レポートは、提供された研究論文に基づいて生成されました。
+        </p>
+      </footer>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const navButtons = document.querySelectorAll(".nav-button");
+        const contentSections = document.querySelectorAll(".content-section");
+
+        navButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            const targetId = button.dataset.target;
+
+            navButtons.forEach((btn) => btn.classList.remove("active"));
+            button.classList.add("active");
+
+            contentSections.forEach((section) => {
+              if (section.id === targetId) {
+                section.classList.add("active");
+              } else {
+                section.classList.remove("active");
+              }
+            });
+          });
+        });
+
+        const ctx = document.getElementById("parameterChart").getContext("2d");
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: ["古典的FFN (BERT-Base)", "量子的FFN (QFFN-BERT)"],
+            datasets: [
+              {
+                label: "FFNパラメータ数",
+                data: [12582912, 100000],
+                backgroundColor: [
+                  "rgba(29, 53, 87, 0.6)",
+                  "rgba(168, 218, 220, 0.8)",
+                ],
+                borderColor: ["rgba(29, 53, 87, 1)", "rgba(168, 218, 220, 1)"],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                type: "logarithmic",
+                title: {
+                  display: true,
+                  text: "パラメータ数 (対数スケール)",
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                display: false,
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    let label = context.dataset.label || "";
+                    if (label) {
+                      label += ": ";
+                    }
+                    if (context.parsed.y !== null) {
+                      label += new Intl.NumberFormat("ja-JP").format(
+                        context.parsed.y
+                      );
+                    }
+                    return label;
+                  },
+                },
+              },
+            },
+          },
+        });
+      });
+
+      function toggleDetails(elementId) {
+        const element = document.getElementById(elementId);
+        element.classList.toggle("hidden");
+      }
+
+      const diagramInfoText = {
+        "classical-info":
+          "データの前処理、量子回路のパラメータ最適化、エラー訂正など、システム全体の制御を担います。",
+        "quantum-info":
+          "アテンション計算や行列演算など、古典計算機では非効率な特定のタスクを量子的に高速処理します。",
+        default:
+          "図の各コンポーネントにマウスオーバーすると説明が表示されます。",
+      };
+
+      function showInfo(infoKey) {
+        document.getElementById("diagram-info").textContent =
+          diagramInfoText[infoKey];
+      }
+
+      function resetInfo() {
+        document.getElementById("diagram-info").textContent =
+          diagramInfoText["default"];
+      }
+    </script>
+  </body>
+</html>
